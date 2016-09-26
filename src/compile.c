@@ -4,6 +4,7 @@
 #include "compile.h"
 #include "timer.h"
 #include "options.h"
+#include "optimize.h"
 
 /* Brainfuck cell */
 #define CELL unsigned char
@@ -107,7 +108,7 @@ static void tokenize(struct Token *commands, const char *code)
 }
 
 /* Interpret commands */
-void compile(const char *code, int options)
+void compile(char *code, FILE * fp, int options)
 {
 	/* Create list of commands from code */
 	struct Token *commands;
@@ -123,19 +124,20 @@ void compile(const char *code, int options)
 	/* Record time if -t */
 	START_TIMER;
 
-	FILE *fp = stdout;
+	optimize(code);
+
 	fprintf(fp,
 		".text\n\taddi $s0, $zero, 0x10010020\nadd $t0, $zero, $zero\n\tli $v0, 11\n");
 	/* Go through command objects */
 	for (int i = 0; commands[i].ctype != BF_END; i++) {
 		switch (commands[i].ctype) {
 		case BF_ADD:
-			fprintf(stdout,
+			fprintf(fp,
 				"\taddi $t0, $t0, %i\n\tsb $t0, 0($s0)\n",
 				commands[i].value);
 			break;
 		case BF_SHIFT:
-			fprintf(stdout,
+			fprintf(fp,
 				"\taddi $s0, $s0, %i\n\tlb $t0, 0($s0)\n",
 				commands[i].value);
 			break;
@@ -149,17 +151,17 @@ void compile(const char *code, int options)
 		case BF_SKIP:
 			if (commands[i + 1].ctype == BF_ADD
 			    && commands[i + 2].ctype == BF_GOTO) {
-				fprintf(stdout,
+				fprintf(fp,
 					"\tadd $t0, $zero, $zero\n\tsb $t0, 0($s0)\n");
 				i += 2;
 			} else {
-				fprintf(stdout,
+				fprintf(fp,
 					"start_%i:\n\tbeq $t0, $zero, end_%i\n",
 					i, commands[i].value);
 			}
 			break;
 		case BF_GOTO:
-			fprintf(stdout, "\tj start_%i\nend_%i:\n",
+			fprintf(fp, "\tj start_%i\nend_%i:\n",
 				commands[i].value, i);
 			break;
 		}

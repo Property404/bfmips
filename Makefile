@@ -15,7 +15,7 @@ EXECUTABLE_NAME = bfmips
 # Compiler flags
 CC = cc # More portable than using 'gcc,' but with risk
 	# of calling wrong compiler
-CFLAGS = -Wall -Wextra -std=gnu99 -O3 -s -pedantic
+CFLAGS = -Wall -Wextra -pedantic -std=gnu99 -O3 -s 
 FILES = compile.c main.c optimize.c
 SOURCES = $(FILES:%.c=$(SRC_DIR)/%.c)
 
