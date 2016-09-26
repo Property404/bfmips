@@ -1,0 +1,30 @@
+SHELL = /bin/sh
+
+# Where the files are
+SRC_DIR = ./src/
+
+# Where to install
+# For Windows/ReactOS:
+#	Change INSTALL_DIR to C:\windows\sytem32\
+#	Change INSTALL_COMMAND to move
+#	Change EXECUTABLE_NAME to bf.exe
+INSTALL_DIR = /usr/local/bin/
+INSTALL_COMMAND = install
+EXECUTABLE_NAME = bfmips
+
+# Compiler flags
+CC = cc # More portable than using 'gcc,' but with risk
+	# of calling wrong compiler
+CFLAGS = -Wall -Wextra -std=gnu99 -O3 -s -pedantic
+FILES = compile.c main.c optimize.c
+SOURCES = $(FILES:%.c=$(SRC_DIR)/%.c)
+
+# Build recipe
+bfmips:
+	$(CC) -o $(EXECUTABLE_NAME) $(SOURCES) $(CFLAGS)
+clean:
+	rm -f $(EXECUTABLE_NAME)
+install:
+	$(INSTALL_COMMAND) $(EXECUTABLE_NAME) $(INSTALL_DIR)
+uninstall:
+	rm  $(INSTALL_DIR)/$(EXECUTABLE_NAME)
